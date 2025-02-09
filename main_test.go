@@ -56,11 +56,14 @@ func TestMainLogic(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]MetricData{
-			"/devices/wb-w1/controls/28-000000000001": {Topic: "test1", Value: 25.5, Timestamp: 1234567890},
-			"/devices/wb-w2/controls/28-000000000001": {Topic: "test2", Value: 30.0, Timestamp: 1234567891},
-			"/devices/msu24hit_5/controls/0000000001": {Topic: "test3", Value: 30.0, Timestamp: 1234567891},
-			"/devices/msu24hit_6/controls/0000000001": {Topic: "test4", Value: 30.0, Timestamp: 1234567891},
-			"/invalid/key/format": {Topic: "test5", Value: 25.5, Timestamp: 1234567890},
+			"/devices/wb-w1/controls/28-000000000001": {Topic: "test3", Value: 25.5, Timestamp: 1234567890},
+			"/devices/wb-w2/controls/28-000000000001": {Topic: "test5", Value: 30.4, Timestamp: 1234567891},
+			"/devices/msu24hit_5/controls/0000000001": {Topic: "test8", Value: 30.2, Timestamp: 1234567891},
+			"/devices/msu24hit_6/controls/0000000001": {Topic: "test69", Value: 30.1, Timestamp: 1234567891},
+			"/devices/msu24hit_6/controls/0000000002": {Topic: "test9", Value: 30.1, Timestamp: 1234567891},
+			"/invalid/key/format": {Topic: "test6", Value: 25.5, Timestamp: 1234567890},
+			"///": {Topic: "test68", Value: 2.5, Timestamp: 1234567890},
+			"/devices/msu24hit_dda/controls/0000000001": {Topic: "test7", Value: 34.0, Timestamp: 1234567891},
 		})
 	}))
 	defer ts.Close()
