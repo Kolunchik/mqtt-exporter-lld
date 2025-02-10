@@ -97,7 +97,7 @@ func main() {
 						if ok {
 							_, err := strconv.ParseUint(index, 10, 32)
 							if err != nil {
-								log.Printf("Invalid counter value: %s", index)
+								log.Printf("Invalid device index value: %s", index)
 								continue
 							}
 							device := LLDData{

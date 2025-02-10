@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"slices"
 )
 
 func TestGetData(t *testing.T) {
@@ -56,13 +57,14 @@ func TestMainLogic(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]MetricData{
-			"/devices/wb-w1/controls/28-000000000001": {Topic: "test3", Value: 25.5, Timestamp: 1234567890},
-			"/devices/wb-w2/controls/28-000000000001": {Topic: "test5", Value: 30.4, Timestamp: 1234567891},
-			"/devices/msu24hit_5/controls/0000000001": {Topic: "test8", Value: 30.2, Timestamp: 1234567891},
-			"/devices/msu24hit_6/controls/0000000001": {Topic: "test69", Value: 30.1, Timestamp: 1234567891},
-			"/devices/msu24hit_6/controls/0000000002": {Topic: "test9", Value: 30.1, Timestamp: 1234567891},
-			"/invalid/key/format": {Topic: "test6", Value: 25.5, Timestamp: 1234567890},
-			"///": {Topic: "test68", Value: 2.5, Timestamp: 1234567890},
+			"/devices/wb-w1/controls/28-000000000001":   {Topic: "test3", Value: 25.5, Timestamp: 1234567890},
+			"/devices/wb-w2/controls/28-000000000001":   {Topic: "test5", Value: 30.4, Timestamp: 1234567891},
+			"/devices/msu24hit_5/controls/0000000001":   {Topic: "test8", Value: 30.2, Timestamp: 1234567891},
+			"/devices/msu24hit_6/controls/0000000001":   {Topic: "test69", Value: 30.1, Timestamp: 1234567891},
+			"/devices/msu24hit_6/controls/0000000002":   {Topic: "test9", Value: 30.1, Timestamp: 1234567891},
+			"/devices/msu24hit_6_7/controls/00000002":   {Topic: "test29", Value: 35.1, Timestamp: 1234567891},
+			"/invalid/key/format":                       {Topic: "test6", Value: 25.5, Timestamp: 1234567890},
+			"///":                                       {Topic: "test68", Value: 2.5, Timestamp: 1234567890},
 			"/devices/msu24hit_dda/controls/0000000001": {Topic: "test7", Value: 34.0, Timestamp: 1234567891},
 		})
 	}))
@@ -77,7 +79,22 @@ func TestMainLogic(t *testing.T) {
 		t.Errorf("LLD data for wb-w1 was not generated correctly")
 	}
 
-	if len(lld["msu24hit"]) != 2 || lld["msu24hit"][0].Device != "msu24hit_5" || lld["msu24hit"][1].Device != "msu24hit_6" {
+	if len(lld["msu24hit"]) == 2 {
+		f := 0
+		if slices.ContainsFunc(lld["msu24hit"], func(n LLDData) bool {
+			return n.Device == "msu24hit_5"
+		}) {
+			f++
+		}
+		if slices.ContainsFunc(lld["msu24hit"], func(n LLDData) bool {
+			return n.Device == "msu24hit_6"
+		}) {
+			f++
+		}
+		if f != 2 {
+			t.Errorf("LLD data for msu24hit was not generated correctly")
+		}
+	} else {
 		t.Errorf("LLD data for msu24hit was not generated correctly")
 	}
 
