@@ -72,7 +72,7 @@ func init() {
 }
 
 func main() {
-	zs := flag.String("zabbix-sender", "zabbix_sender --config /etc/zabbix/zabbix_agentd.conf --verbose", "zabbix_sender command")
+	zs := flag.String("zabbix-sender", "zabbix_sender --config /etc/zabbix/zabbix_agent2.conf --verbose", "zabbix_sender command")
 	zh := flag.String("zabbix-host", "", "host name the item belongs to")
 	flag.Parse()
 
