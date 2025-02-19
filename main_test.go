@@ -5,8 +5,8 @@ import (
 	"flag"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 	"slices"
+	"testing"
 )
 
 func TestGetData(t *testing.T) {

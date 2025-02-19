@@ -80,35 +80,40 @@ func main() {
 		log.Printf("Gotcha")
 	}
 
-	for key, _ := range metrics {
-		parsed := strings.SplitN(key, "/", 10)
+	for k, _ := range metrics {
+		var prefix, key string
+		parsed := strings.SplitN(k, "/", 10)
 		l := len(parsed)
-		if l > 2 {
-			if parsed[1] == "devices" && parsed[3] == "controls" {
-				if parsed[2] == "wb-w1" && l > 4 {
-					device := LLDData{
-						Device: parsed[4],
-					}
-					addLLD(parsed[2], device)
-				} else {
-					if l == 5 {
-						longname := parsed[2]
-						name, index, ok := strings.Cut(parsed[2], "_")
-						if ok {
-							_, err := strconv.ParseUint(index, 10, 32)
-							if err != nil {
-								log.Printf("Invalid device index value: %s", index)
-								continue
-							}
-							device := LLDData{
-								Device: longname,
-							}
-							addLLD(name, device)
-						}
-					}
+		if l < 5 {
+			log.Printf("Oh, %v < 5, skip %v", l, k)
+			continue
+		}
+		if parsed[1] != "devices" && parsed[3] != "controls" {
+			log.Printf("No /devices/*/controls/ found, skip %v", k)
+			continue
+		}
+		if parsed[2] == "wb-w1" {
+			prefix = parsed[2]
+			key = parsed[4]
+		} else {
+			var ok bool
+			prefix, key, ok = strings.Cut(parsed[2], "_")
+			if ok {
+				_, err := strconv.ParseUint(key, 10, 32)
+				if err != nil {
+					log.Printf("Invalid device key value: %s, skip", key)
+					continue
 				}
+				key = parsed[2]
+			} else {
+				log.Printf("Not found device number: %s, skip", prefix)
+				continue
 			}
 		}
+		device := LLDData{
+			Device: key,
+		}
+		addLLD(prefix, device)
 	}
 
 	if len(*zh) > 0 {
