@@ -79,15 +79,19 @@ func TestMainLogic(t *testing.T) {
 		t.Errorf("LLD data for wb-w1 was not generated correctly")
 	}
 
+	if len(lld["wb-w1"][0].Id) > 0 {
+		t.Errorf("LLD data for wb-w1 was not generated correctly")
+	}
+
 	if len(lld["msu24hit"]) == 2 {
 		f := 0
 		if slices.ContainsFunc(lld["msu24hit"], func(n LLDData) bool {
-			return n.Device == "msu24hit_5"
+			return n.Device == "msu24hit_5" && n.Id == "5"
 		}) {
 			f++
 		}
 		if slices.ContainsFunc(lld["msu24hit"], func(n LLDData) bool {
-			return n.Device == "msu24hit_6"
+			return n.Device == "msu24hit_6" && n.Id == "6"
 		}) {
 			f++
 		}

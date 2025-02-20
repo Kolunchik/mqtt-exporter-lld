@@ -24,12 +24,13 @@ type LLDData struct {
 	Device string `json:"{#DEVICE}"`
 	Name   string `json:"{#NAME},omitempty"`
 	Macro  string `json:"{#MACRO},omitempty"`
+	Id     string `json:"{#ID},omitempty"`
 }
 
 var (
-	metrics = make(map[string]MetricData)
-	lld     = make(map[string][]LLDData)
-	httpURL string
+	metrics         = make(map[string]MetricData)
+	lld             = make(map[string][]LLDData)
+	httpURL, commit string
 )
 
 func getData(httpURL string) bool {
@@ -58,7 +59,7 @@ func getData(httpURL string) bool {
 
 func addLLD(key string, device LLDData) bool {
 	for i := range lld[key] {
-		if lld[key][i].Device == device.Device {
+		if lld[key][i].Device == device.Device && lld[key][i].Id == device.Id {
 			log.Printf("Device %s %s already exists in lld", key, device.Device)
 			return false
 		}
@@ -77,11 +78,11 @@ func main() {
 	flag.Parse()
 
 	if getData(httpURL) {
-		log.Printf("Gotcha")
+		log.Printf("commit %s", commit)
 	}
 
 	for k, _ := range metrics {
-		var prefix, key string
+		var prefix, device, id string
 		parsed := strings.SplitN(k, "/", 10)
 		l := len(parsed)
 		if l < 5 {
@@ -94,26 +95,27 @@ func main() {
 		}
 		if parsed[2] == "wb-w1" {
 			prefix = parsed[2]
-			key = parsed[4]
+			device = parsed[4]
 		} else {
 			var ok bool
-			prefix, key, ok = strings.Cut(parsed[2], "_")
+			prefix, id, ok = strings.Cut(parsed[2], "_")
 			if ok {
-				_, err := strconv.ParseUint(key, 10, 32)
+				_, err := strconv.ParseUint(id, 10, 32)
 				if err != nil {
-					log.Printf("Invalid device key value: %s, skip", key)
+					log.Printf("Invalid device id value: %s, skip", prefix)
 					continue
 				}
-				key = parsed[2]
+				device = parsed[2]
 			} else {
-				log.Printf("Not found device number: %s, skip", prefix)
+				log.Printf("Not found device id: %s, skip", prefix)
 				continue
 			}
 		}
-		device := LLDData{
-			Device: key,
+		dev := LLDData{
+			Device: device,
+			Id:     id,
 		}
-		addLLD(prefix, device)
+		addLLD(prefix, dev)
 	}
 
 	if len(*zh) > 0 {
