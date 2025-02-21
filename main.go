@@ -79,6 +79,8 @@ func main() {
 
 	if getData(httpURL) {
 		log.Printf("commit %s", commit)
+	} else {
+		log.Fatalf("Can`t get data from %v", httpURL)
 	}
 
 	for k, _ := range metrics {
