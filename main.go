@@ -75,6 +75,7 @@ func init() {
 func main() {
 	zs := flag.String("zabbix-sender", "zabbix_sender --config /etc/zabbix/zabbix_agent2.conf --verbose", "zabbix_sender command")
 	zh := flag.String("zabbix-host", "", "host name the item belongs to")
+	legacy := flag.Bool("legacy", false, "do not use this")
 	flag.Parse()
 
 	if getData(httpURL) {
@@ -116,6 +117,7 @@ func main() {
 		dev := LLDData{
 			Device: device,
 			Id:     id,
+			Macro:  strings.ReplaceAll(strings.ToUpper("N_"+device), "-", "_"),
 		}
 		addLLD(prefix, dev)
 	}
@@ -125,6 +127,13 @@ func main() {
 	}
 
 	for k, v := range lld {
+		if *legacy {
+			for i := range v {
+				if v[i].Id != "" {
+					v[i].Device = v[i].Id
+				}
+			}
+		}
 		j, err := json.Marshal(v)
 		if err != nil {
 			log.Printf("JSON encode error: %s", err)

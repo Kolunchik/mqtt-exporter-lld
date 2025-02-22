@@ -60,6 +60,7 @@ func TestMainLogic(t *testing.T) {
 			"/devices/wb-w1/controls/28-000000000001":   {Topic: "test3", Value: 25.5, Timestamp: 1234567890},
 			"/devices/wb-w2/controls/28-000000000001":   {Topic: "test5", Value: 30.4, Timestamp: 1234567891},
 			"/devices/msu24hit_5/controls/0000000001":   {Topic: "test8", Value: 30.2, Timestamp: 1234567891},
+			"/devices/wb-mcm16_1/controls/0005000001":   {Topic: "test-8", Value: 30.3, Timestamp: 1234567891},
 			"/devices/msu24hit_6/controls/0000000001":   {Topic: "test69", Value: 30.1, Timestamp: 1234567891},
 			"/devices/msu24hit_6/controls/0000000002":   {Topic: "test9", Value: 30.1, Timestamp: 1234567891},
 			"/devices/msu24hit_6_7/controls/00000002":   {Topic: "test29", Value: 35.1, Timestamp: 1234567891},
@@ -86,12 +87,17 @@ func TestMainLogic(t *testing.T) {
 	if len(lld["msu24hit"]) == 2 {
 		f := 0
 		if slices.ContainsFunc(lld["msu24hit"], func(n LLDData) bool {
-			return n.Device == "msu24hit_5" && n.Id == "5"
+			return n.Device == "msu24hit_5" && n.Id == "5" && n.Macro == "N_MSU24HIT_5"
 		}) {
 			f++
 		}
 		if slices.ContainsFunc(lld["msu24hit"], func(n LLDData) bool {
-			return n.Device == "msu24hit_6" && n.Id == "6"
+			return n.Device == "msu24hit_6" && n.Id == "6" && n.Macro == "N_MSU24HIT_6"
+		}) {
+			f++
+		}
+		if slices.ContainsFunc(lld["wb-mcm16"], func(n LLDData) bool {
+			return n.Device == "wb-mcm16" && n.Id == "1" && n.Macro == "N_WB_MCM16_1"
 		}) {
 			f++
 		}
@@ -102,8 +108,8 @@ func TestMainLogic(t *testing.T) {
 		t.Errorf("LLD data for msu24hit was not generated correctly")
 	}
 
-	if len(lld) != 3 {
-		t.Errorf("LLD data should have 3 keys")
+	if len(lld) != 4 {
+		t.Errorf("LLD data should have 4 keys")
 	}
 }
 
