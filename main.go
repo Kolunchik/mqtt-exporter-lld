@@ -27,14 +27,10 @@ type LLDData struct {
 	Id     string `json:"{#ID},omitempty"`
 }
 
-var (
-	metrics         = make(map[string]MetricData)
-	lld             = make(map[string][]LLDData)
-	httpURL, commit string
-)
+var commit = "unknown"
 
-func getData(httpURL string) bool {
-	res, err := http.Get(httpURL)
+func getmetrics(url string, metrics map[string]MetricData) bool {
+	res, err := http.Get(url)
 	if err != nil {
 		log.Print(err)
 		return false
@@ -57,7 +53,7 @@ func getData(httpURL string) bool {
 	return true
 }
 
-func addLLD(key string, device LLDData) bool {
+func addLLD(lld map[string][]LLDData, key string, device LLDData) bool {
 	for i := range lld[key] {
 		if lld[key][i].Device == device.Device && lld[key][i].Id == device.Id {
 			log.Printf("Device %s %s already exists in lld", key, device.Device)
@@ -68,22 +64,27 @@ func addLLD(key string, device LLDData) bool {
 	return true
 }
 
-func init() {
-	flag.StringVar(&httpURL, "http-url", "http://localhost:8080/v1/metrics", "url of mqtt-exporter metrics")
+func lldresult(lld map[string][]LLDData, zh string, legacy bool) bool {
+	for k, v := range lld {
+		if legacy {
+			for i := range v {
+				if v[i].Id != "" {
+					v[i].Device = v[i].Id
+				}
+			}
+		}
+		j, err := json.Marshal(v)
+		if err != nil {
+			log.Printf("JSON encode error: %s", err)
+			return false
+		}
+		k = k + ".lld"
+		fmt.Printf("%q %q %q\n", zh, k, j)
+	}
+	return true
 }
 
-func main() {
-	zs := flag.String("zabbix-sender", "zabbix_sender --config /etc/zabbix/zabbix_agent2.conf --verbose", "zabbix_sender command")
-	zh := flag.String("zabbix-host", "", "host name the item belongs to")
-	legacy := flag.Bool("legacy", false, "do not use this")
-	flag.Parse()
-
-	if getData(httpURL) {
-		log.Printf("commit %s", commit)
-	} else {
-		log.Fatalf("Can`t get data from %v", httpURL)
-	}
-
+func lldparse(metrics map[string]MetricData, lld map[string][]LLDData) bool {
 	for k, _ := range metrics {
 		var prefix, device, id string
 		parsed := strings.SplitN(k, "/", 10)
@@ -119,27 +120,33 @@ func main() {
 			Id:     id,
 			Macro:  strings.ReplaceAll(strings.ToUpper("N_"+device), "-", "_"),
 		}
-		addLLD(prefix, dev)
+		addLLD(lld, prefix, dev)
 	}
+	return true
+}
 
-	if len(*zh) > 0 {
-		*zh = fmt.Sprintf("--host %q", *zh)
+func main() {
+	var (
+		metrics = make(map[string]MetricData)
+		lld     = make(map[string][]LLDData)
+		opts    struct {
+			metrics_url string
+			legacy      bool
+			zh          string
+		}
+	)
+
+	flag.StringVar(&opts.metrics_url, "metrics-url", "http://localhost:8080/v1/metrics", "url of mqtt-exporter metrics")
+	flag.StringVar(&opts.zh, "zabbix-host", "-", "host name of zabbix host")
+	flag.BoolVar(&opts.legacy, "legacy", false, "do not use this")
+	flag.Parse()
+	if !getmetrics(opts.metrics_url, metrics) {
+		log.Fatalf("Can`t get metrics from %v", opts.metrics_url)
 	}
-
-	for k, v := range lld {
-		if *legacy {
-			for i := range v {
-				if v[i].Id != "" {
-					v[i].Device = v[i].Id
-				}
-			}
-		}
-		j, err := json.Marshal(v)
-		if err != nil {
-			log.Printf("JSON encode error: %s", err)
-			continue
-		}
-		k = k + ".lld"
-		fmt.Printf("%s %s --key %q --value %q\n", *zs, *zh, k, j)
+	if !lldparse(metrics, lld) {
+		log.Fatalf("Can`t parse metrics!")
+	}
+	if !lldresult(lld, opts.zh, opts.legacy) {
+		log.Fatalf("Can`t show result :(")
 	}
 }
