@@ -14,8 +14,8 @@ var (
 )
 
 func TestInvalidURL(t *testing.T) {
-	if getmetrics("http://invalid.url", metrics) {
-		t.Errorf("getmetrics() returned true for invalid URL, expected false")
+	if getMetrics("http://invalid.url", metrics) {
+		t.Errorf("getMetrics() returned true for invalid URL, expected false")
 	}
 }
 
@@ -28,9 +28,9 @@ func TestInvalidJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	// Вызываем функцию getmetrics с URL мок-сервера
-	if getmetrics(ts.URL, metrics) {
-		t.Errorf("getmetrics() returned true for invalid JSON, expected false")
+	// Вызываем функцию getMetrics с URL мок-сервера
+	if getMetrics(ts.URL, metrics) {
+		t.Errorf("getMetrics() returned true for invalid JSON, expected false")
 	}
 }
 
@@ -41,9 +41,9 @@ func TestHTTPError(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	// Вызываем функцию getmetrics с URL мок-сервера
-	if getmetrics(ts.URL, metrics) {
-		t.Errorf("getmetrics() returned true for HTTP error, expected false")
+	// Вызываем функцию getMetrics с URL мок-сервера
+	if getMetrics(ts.URL, metrics) {
+		t.Errorf("getMetrics() returned true for HTTP error, expected false")
 	}
 }
 
@@ -68,9 +68,9 @@ func TestGetMetrics(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	// Вызываем функцию getmetrics с URL мок-сервера
-	if !getmetrics(ts.URL, metrics) {
-		t.Errorf("getmetrics() returned false, expected true")
+	// Вызываем функцию getMetrics с URL мок-сервера
+	if !getMetrics(ts.URL, metrics) {
+		t.Errorf("getMetrics() returned false, expected true")
 	}
 
 	// Проверяем, что данные были правильно загружены
@@ -79,13 +79,13 @@ func TestGetMetrics(t *testing.T) {
 	}
 }
 
-func TestAddLLD(t *testing.T) {
+func TestAddDevice(t *testing.T) {
 	key := "testKey"
 	device := LLDData{Device: "testDevice"}
 
 	// Добавляем устройство
-	if !addLLD(lld, key, device) {
-		t.Errorf("addLLD() returned false, expected true")
+	if !addDevice(lld, key, device) {
+		t.Errorf("addDevice() returned false, expected true")
 	}
 
 	// Проверяем, что устройство было добавлено
@@ -94,14 +94,14 @@ func TestAddLLD(t *testing.T) {
 	}
 
 	// Пытаемся добавить то же устройство снова
-	if addLLD(lld, key, device) {
-		t.Errorf("addLLD() returned true for duplicate device, expected false")
+	if addDevice(lld, key, device) {
+		t.Errorf("addDevice() returned true for duplicate device, expected false")
 	}
 }
 
 func TestMainLogicLLD(t *testing.T) {
-	if !lldparse(metrics, lld) {
-		t.Errorf("lldparse() returned false, expected true")
+	if !lldParse(metrics, lld) {
+		t.Errorf("lldParse() returned false, expected true")
 	}
 
 	// Проверяем, что LLD данные были правильно сформированы
@@ -142,14 +142,14 @@ func TestMainLogicLLD(t *testing.T) {
 		t.Errorf("LLD data should have 4 keys")
 	}
 
-	if !lldresult(lld, "figa", false) {
-		t.Errorf("lldresult() returned false, expected true")
+	if !lldResult(lld, "figa", false) {
+		t.Errorf("lldResult() returned false, expected true")
 	}
 }
 
 func TestMainLogicLLDLegacy(t *testing.T) {
-	if !lldresult(lld, "legacy", true) {
-		t.Errorf("lldparse() returned false, expected true")
+	if !lldResult(lld, "legacy", true) {
+		t.Errorf("lldParse() returned false, expected true")
 	}
 
 	// Проверяем, что LLD данные были правильно сформированы

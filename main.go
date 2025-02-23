@@ -29,7 +29,7 @@ type LLDData struct {
 
 var commit = "unknown"
 
-func getmetrics(url string, metrics map[string]MetricData) bool {
+func getMetrics(url string, metrics map[string]MetricData) bool {
 	res, err := http.Get(url)
 	if err != nil {
 		log.Print(err)
@@ -53,7 +53,7 @@ func getmetrics(url string, metrics map[string]MetricData) bool {
 	return true
 }
 
-func addLLD(lld map[string][]LLDData, key string, device LLDData) bool {
+func addDevice(lld map[string][]LLDData, key string, device LLDData) bool {
 	for i := range lld[key] {
 		if lld[key][i].Device == device.Device && lld[key][i].Id == device.Id {
 			log.Printf("Device %s %s already exists in lld", key, device.Device)
@@ -64,7 +64,7 @@ func addLLD(lld map[string][]LLDData, key string, device LLDData) bool {
 	return true
 }
 
-func lldresult(lld map[string][]LLDData, zh string, legacy bool) bool {
+func lldResult(lld map[string][]LLDData, zh string, legacy bool) bool {
 	for k, v := range lld {
 		if legacy {
 			for i := range v {
@@ -84,7 +84,7 @@ func lldresult(lld map[string][]LLDData, zh string, legacy bool) bool {
 	return true
 }
 
-func lldparse(metrics map[string]MetricData, lld map[string][]LLDData) bool {
+func lldParse(metrics map[string]MetricData, lld map[string][]LLDData) bool {
 	for k, _ := range metrics {
 		var prefix, device, id string
 		parsed := strings.SplitN(k, "/", 10)
@@ -120,7 +120,7 @@ func lldparse(metrics map[string]MetricData, lld map[string][]LLDData) bool {
 			Id:     id,
 			Macro:  strings.ReplaceAll(strings.ToUpper("N_"+device), "-", "_"),
 		}
-		addLLD(lld, prefix, dev)
+		addDevice(lld, prefix, dev)
 	}
 	return true
 }
@@ -140,13 +140,13 @@ func main() {
 	flag.StringVar(&opts.zh, "zabbix-host", "-", "host name of zabbix host")
 	flag.BoolVar(&opts.legacy, "legacy", false, "do not use this")
 	flag.Parse()
-	if !getmetrics(opts.metrics_url, metrics) {
+	if !getMetrics(opts.metrics_url, metrics) {
 		log.Fatalf("Can`t get metrics from %v", opts.metrics_url)
 	}
-	if !lldparse(metrics, lld) {
+	if !lldParse(metrics, lld) {
 		log.Fatalf("Can`t parse metrics!")
 	}
-	if !lldresult(lld, opts.zh, opts.legacy) {
+	if !lldResult(lld, opts.zh, opts.legacy) {
 		log.Fatalf("Can`t show result :(")
 	}
 }
