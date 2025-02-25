@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type MetricData struct {
@@ -30,7 +31,10 @@ type LLDData struct {
 var commit = "unknown"
 
 func getMetrics(url string, metrics map[string]MetricData) bool {
-	res, err := http.Get(url)
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+	res, err := client.Get(url)
 	if err != nil {
 		log.Print(err)
 		return false
