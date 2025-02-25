@@ -79,7 +79,23 @@ func lldResult(lld map[string][]LLDData, zh string, legacy bool) bool {
 			return false
 		}
 		k = k + ".lld"
-		fmt.Printf("%q %q %q\n", zh, k, j)
+		forSender(zh, k, j)
+	}
+	return true
+}
+
+func forSender(zh string, key string, value interface{}) bool {
+	switch v := value.(type) {
+	case string:
+		fmt.Printf("%q %q %q\n", zh, key, v)
+	case int:
+		fmt.Printf("%q %q \"%d\"\n", zh, key, v)
+	case float64:
+		fmt.Printf("%q %q \"%f\"\n", zh, key, v)
+	case []byte:
+		fmt.Printf("%q %q \"%q\"\n", zh, key, string(v))
+	default:
+		fmt.Printf("%q %q \"%v\"\n", zh, key, v)
 	}
 	return true
 }
