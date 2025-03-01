@@ -32,15 +32,15 @@ var commit = "unknown"
 
 func getMetrics(url string, metrics map[string]MetricData) bool {
 	client := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 3 * time.Second,
 	}
 	res, err := client.Get(url)
 	if err != nil {
 		log.Print(err)
 		return false
 	}
+	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
-	res.Body.Close()
 	if res.StatusCode > 299 {
 		log.Printf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
 		return false
