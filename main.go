@@ -70,14 +70,18 @@ func addDevice(lld map[string][]LLDData, key string, device LLDData) bool {
 
 func lldResult(lld map[string][]LLDData, zh string, legacy bool) bool {
 	for k, v := range lld {
+		var j []byte
+		var err error
 		if legacy {
 			for i := range v {
 				if v[i].Id != "" {
 					v[i].Device = v[i].Id
 				}
 			}
+			j, err = json.Marshal(map[string]interface{}{"data": v})
+		} else {
+			j, err = json.Marshal(v)
 		}
-		j, err := json.Marshal(v)
 		if err != nil {
 			log.Printf("JSON encode error: %s", err)
 			return false
@@ -97,7 +101,7 @@ func forSender(zh string, key string, value interface{}) bool {
 	case float64:
 		fmt.Printf("%q %q \"%f\"\n", zh, key, v)
 	case []byte:
-		fmt.Printf("%q %q \"%q\"\n", zh, key, string(v))
+		fmt.Printf("%q %q %q\n", zh, key, string(v))
 	default:
 		fmt.Printf("%q %q \"%v\"\n", zh, key, v)
 	}

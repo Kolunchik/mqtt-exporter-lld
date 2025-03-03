@@ -98,6 +98,8 @@ func TestGetMetrics(t *testing.T) {
 			"/invalid/key/format":                       {Topic: "test6", Value: 25.5, Timestamp: 1234567890},
 			"///":                                       {Topic: "test68", Value: 2.5, Timestamp: 1234567890},
 			"/devices/msu24hit_dda/controls/0000000001": {Topic: "test7", Value: 34.0, Timestamp: 1234567891},
+			"/devices/wb-gpio/controls/EXT1_DR14":       {Topic: "test88", Value: 0, Timestamp: 1234567891},
+			"/devices/wb-gpio/controls/EXT1_DR14/meta":  {Topic: "test888", Value: "{\"order\":14,\"readonly\":true,\"type\":\"switch\"}", Timestamp: 1234567891},
 		})
 	}))
 	defer ts.Close()
